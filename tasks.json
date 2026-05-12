@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run tests for .pdf and .docx support",
+			"type": "shell",
+			"command": "python -m unittest discover",
+			"args": [],
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Run test_detector.py",
+			"type": "shell",
+			"command": "python test_detector.py",
+			"args": [],
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

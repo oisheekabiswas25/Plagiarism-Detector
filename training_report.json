@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "dataset_path": "dataset.txt",
+    "corpus_size": 125,
+    "training_rows": 625,
+    "feature_columns": [
+      "cosine_similarity",
+      "token_jaccard",
+      "containment",
+      "length_ratio",
+      "shared_ngrams",
+      "char_jaccard",
+      "token_overlap"
+    ],
+    "best_model": "svm"
+  },
+  "models": {
+    "svm": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "mean_probability": 0.6
+    },
+    "rf": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "mean_probability": 0.5999
+    },
+    "lr": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "mean_probability": 0.5993
+    },
+    "knn": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "mean_probability": 0.6
+    },
+    "best_model": {
+      "name": "svm"
+    }
+  }
+}

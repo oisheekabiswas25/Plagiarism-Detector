@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Plagiarism Detector - Analyze Documents{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">Academic Integrity Dashboard</p>
+                <h1>Broader plagiarism detection with passage-level evidence.</h1>
+                <p class="hero-text">
+                    Analyze essays, reports, and copied snippets against your large dataset corpus,
+                    then review suspicious passages, matched sources, and writing-health signals in one place.
+                </p>
+                <div class="hero-pills">
+                    <span>Corpus-backed similarity</span>
+                    <span>Paste or upload text files</span>
+                    <span>Readable risk summary</span>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="mini-stat">
+                    <span>Mode</span>
+                    <strong>Reviewer</strong>
+                </div>
+                <div class="mini-stat">
+                    <span>Input</span>
+                    <strong>Text / CSV / PDF / Word / Markdown</strong>
+                </div>
+                <div class="mini-stat">
+                    <span>Output</span>
+                    <strong>Score + Source Clues</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="workspace">
+            <form id="analysis-form" class="editor-panel">
+                <label for="text-input" class="panel-title">Document Under Review</label>
+                <textarea id="text-input" name="text" placeholder="Paste student text, article content, report paragraphs, or assignment answers here..."></textarea>
+
+                <div class="toolbar">
+                    <label class="model-picker">
+                        <span>ML model</span>
+                        <select id="model-input" name="model">
+                            {% for model in model_choices %}
+                            <option value="{{ model.name }}" {% if model.name == default_model %}selected{% endif %}>
+                                {{ model.label }}{% if model.f1 %} · F1 {{ model.f1 }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="upload-chip">
+                        <input id="file-input" type="file" name="file" accept=".txt,.md,.csv,.pdf,.docx,.doc">
+                        <span>Upload file</span>
+                    </label>
+                    <button type="button" class="ghost-button sample-button" data-sample="Climate change and renewable energy are critical global challenges. Renewable energy sources like solar and wind power help reduce carbon emissions and combat climate change. Investment in clean energy infrastructure is essential for sustainable development.">
+                        Energy/Climate
+                    </button>
+                    <button type="button" class="ghost-button sample-button" data-sample="Artificial intelligence and machine learning are rapidly transforming industries. Neural networks enable computers to learn patterns from data without explicit programming. Deep learning algorithms achieve remarkable accuracy in image recognition, natural language processing, and predictive analytics.">
+                        AI/ML
+                    </button>
+                    <button type="button" class="ghost-button sample-button" data-sample="Cloud computing provides scalable infrastructure for modern applications. Distributed systems enable efficient data processing and storage across multiple servers. Microservices architecture improves application flexibility and deployment speed.">
+                        Cloud Tech
+                    </button>
+                    <button type="submit" class="primary-button">Analyze document</button>
+                </div>
+                <p id="file-name" class="file-name">No file selected</p>
+            </form>
+
+            <section id="results-panel" class="results-panel hidden">
+                <div class="summary-grid">
+                    <article class="metric-card highlight">
+                        <div class="metric-header">
+                            <i class="fas fa-percentage"></i>
+                            <span>Plagiarism score</span>
+                        </div>
+                        <strong id="score-value">0%</strong>
+                        <p id="risk-value">Low Risk</p>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-brain"></i>
+                            <span>Chosen model</span>
+                        </div>
+                        <strong id="model-name">LR</strong>
+                        <p id="best-model">Best model: LR</p>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-file-word"></i>
+                            <span>Words</span>
+                        </div>
+                        <strong id="word-count">0</strong>
+                        <p>Document size</p>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-flag"></i>
+                            <span>Flagged passages</span>
+                        </div>
+                        <strong id="flagged-count">0</strong>
+                        <p>Suspicious segments</p>
+                    </article>
+                </div>
+
+                <div class="rating-section">
+                    <div class="rating-label">
+                        <i class="fas fa-star"></i>
+                        <span>Auto-Rating (Based on Plagiarism Score)</span>
+                    </div>
+                    <div class="star-rating" id="star-rating">
+                        <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                        <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                        <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                        <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                        <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                    </div>
+                    <span id="rating-display" class="rating-display">Calculating...</span>
+                </div>
+
+                <div class="insights-grid">
+                    <article class="insight-card">
+                        <h2><i class="fas fa-lightbulb"></i> Suggestions</h2>
+                        <ul id="suggestions-list"></ul>
+                    </article>
+                    <article class="insight-card">
+                        <h2><i class="fas fa-book"></i> Top Source Matches</h2>
+                        <div id="sources-list" class="stack"></div>
+                    </article>
+                </div>
+
+                <article class="insight-card full-width">
+                    <h2><i class="fas fa-highlighter"></i> Passage Review</h2>
+                    <div id="passages-list" class="stack"></div>
+                </article>
+            </section>
+
+            <section id="empty-state" class="empty-state">
+                <h2>Ready to inspect a document</h2>
+                <p>
+                    Paste text or upload a `.txt`, `.md`, `.csv`, `.pdf`, `.docx`, or `.doc` file, then the app will estimate plagiarism risk,
+                    list the strongest source overlaps, and highlight where the text looks most suspicious.
+                </p>
+            </section>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

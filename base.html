@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plagiarism Detector{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}">🔍 Plagiarism Detector</a>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}">Analyze</a></li>
+                <li><a href="{{ url_for('history') }}">History</a></li>
+                <li class="theme-toggle">
+                    <button id="theme-btn" class="theme-btn" title="Toggle dark mode">🌙</button>
+                </li>
+                <li class="user-menu">
+                    <span class="user-name">{{ current_user.username }}</span>
+                    <a href="{{ url_for('auth.profile') }}" title="Profile">👤</a>
+                    <a href="{{ url_for('auth.logout') }}" class="logout-btn">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alerts-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                    <button class="close-alert">×</button>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+    
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="footer">
+        <p>&copy; 2026 Plagiarism Detector | Secure Academic Integrity</p>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

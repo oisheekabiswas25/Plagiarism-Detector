@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <h1>Analysis History</h1>
+        <p>Your plagiarism analysis records</p>
+    </div>
+    
+    {% if analyses.items %}
+    <div class="analyses-list">
+        <table class="analyses-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-file"></i> Document</th>
+                    <th><i class="fas fa-calendar"></i> Date</th>
+                    <th><i class="fas fa-percentage"></i> Score</th>
+                    <th><i class="fas fa-shield"></i> Risk Level</th>
+                    <th><i class="fas fa-brain"></i> Model</th>
+                    <th><i class="fas fa-star"></i> Rating</th>
+                    <th><i class="fas fa-actions"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for analysis in analyses.items %}
+                <tr>
+                    <td class="doc-name">
+                        {% if analysis.file_type %}
+                            <i class="fas fa-file-{{ analysis.file_type.replace('.', '') }}"></i>
+                        {% else %}
+                            <i class="fas fa-file-alt"></i>
+                        {% endif %}
+                        {{ analysis.source_name }}
+                    </td>
+                    <td>{{ analysis.created_at.strftime('%b %d, %Y') }}</td>
+                    <td class="score">{{ "%.1f"|format(analysis.plagiarism_score) }}%</td>
+                    <td>
+                        <span class="risk-badge risk-{{ analysis.risk_level.lower().replace(' ', '-') }}">
+                            {{ analysis.risk_level }}
+                        </span>
+                    </td>
+                    <td>{{ analysis.model_used.upper() }}</td>
+                    <td class="rating-cell">
+                        {% if analysis.user_rating %}
+                            <span class="rating-stars">
+                                {% for i in range(1, 6) %}
+                                    <i class="fas fa-star{% if i <= analysis.user_rating %}{% else %} empty-star{% endif %}"></i>
+                                {% endfor %}
+                            </span>
+                        {% else %}
+                            <span class="no-rating">Not rated</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}" class="btn-small">View</a>
+                        <a href="#" class="btn-small btn-delete" data-id="{{ analysis.id }}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if analyses.has_prev %}
+            <a href="{{ url_for('history', page=analyses.prev_num) }}" class="page-link">← Previous</a>
+        {% endif %}
+        
+        <span class="page-info">Page {{ analyses.page }} of {{ analyses.pages }}</span>
+        
+        {% if analyses.has_next %}
+            <a href="{{ url_for('history', page=analyses.next_num) }}" class="page-link">Next →</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No analyses yet. <a href="{{ url_for('index') }}">Start analyzing documents</a></p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.history-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.history-header {
+    margin-bottom: 2rem;
+}
+
+.analyses-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+.analyses-table th {
+    background: #f5f5f5;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.analyses-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.risk-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.risk-low-risk {
+    background: #d4edda;
+    color: #155724;
+}
+
+.risk-moderate-risk {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.risk-high-risk {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.rating-cell {
+    text-align: center;
+}
+
+.rating-stars {
+    color: #FFD700;
+    font-size: 0.9rem;
+}
+
+.rating-stars i.empty-star {
+    color: #ddd;
+}
+
+.no-rating {
+    color: #999;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.empty-state a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.pagination {
+    text-align: center;
+    padding: 1rem;
+}
+
+.page-link {
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.page-link:hover {
+    background: #0056b3;
+}
+</style>
+{% endblock %}
